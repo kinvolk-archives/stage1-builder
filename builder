@@ -43,7 +43,7 @@ test -f "${kernel_config}" ||
 test -f "${kernel_dir}/kernel.tar.xz" || curl -LsS "${kernel_url}" -o "${kernel_dir}/kernel.tar.xz"
 
 # unpack kernel
-test $(find "${kernel_source_dir}" -maxdepth 0 -type d -empty 2>/dev/null) && tar -C "${kernel_source_dir}" --strip-components=1 -xf "${kernel_dir}/kernel.tar.xz"
+test "$(find "${kernel_source_dir}" -maxdepth 0 -type d -empty 2>/dev/null)" && tar -C "${kernel_source_dir}" --strip-components=1 -xf "${kernel_dir}/kernel.tar.xz"
 
 # configure kernel
 test -f "${kernel_source_dir}/.config" || sed -e "s/-rkt-v1/${kernel_version_suffix}/g" "${kernel_config}" >"${kernel_source_dir}/.config"
