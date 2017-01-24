@@ -1,0 +1,77 @@
+{
+	"acKind": "ImageManifest",
+	"acVersion": "0.8.9",
+	"name": "kinvolk.io/rkt/stage1-kvm-linux-{{kernel_version}}",
+	"labels": [
+		{
+			"name": "arch",
+			"value": "amd64"
+		},
+		{
+			"name": "os",
+			"value": "linux"
+		},
+		{
+			"name": "version",
+			"value": "0.1.0"
+		}
+	],
+	"annotations": [
+		{
+			"name": "coreos.com/rkt/stage1/run",
+			"value": "/init"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/enter",
+			"value": "/enter_kvm"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/gc",
+			"value": "/gc"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/stop",
+			"value": "/stop_kvm"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/app/add",
+			"value": "/app-add"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/app/rm",
+			"value": "/app-rm"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/app/start",
+			"value": "/app-start"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/app/stop",
+			"value": "/app-stop"
+		},
+		{
+			"name": "coreos.com/rkt/stage1/interface-version",
+			"value": "5"
+		}
+	],
+	"dependencies": [
+		{
+			"imageName": "coreos.com/rkt/stage1-kvm",
+			"labels": [
+				{
+					"name": "os",
+					"value": "linux"
+				},
+				{
+					"name": "arch",
+					"value": "amd64"
+				},
+				{
+					"name": "version",
+					"value": "1.22.0"
+				}
+			]
+		}
+	]
+}
+
