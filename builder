@@ -5,16 +5,17 @@ set -eu
 set -o pipefail
 
 if [[ $# -gt 3 ]]; then
-  echo "Usage: $0 <kernel version> [<target dir> [<build dir>]]" >&2
-  echo "Example: $0 4.9.4 aci/ /tmp/aci-build"
+  echo "Usage: $0 [<kernel version> [<target dir> [<build dir>]]]" >&2
+  echo "Example: $0 4.9.4 aci/ /tmp/aci-build" >&2
   exit 1
 fi
 
-readonly kernel_latest_stable="4.9.4"
+readonly kernel_latest_stable="4.9.5"
 
 readonly dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly kernel_version="${1:-${kernel_latest_stable}}"
 readonly kernel_version_suffix="-kinvolk-v1"
+readonly kernel_version_minor="${kernel_version%.*}"
 readonly aci_dir="${2:-${dir}/aci/${kernel_version}}"
 mkdir -p "${aci_dir}"
 readonly target_aci="stage1-kvm-linux-${kernel_version}.aci"
@@ -27,17 +28,19 @@ readonly kernel_dir="${build_dir}/kernel"
 mkdir -p "${kernel_dir}"
 readonly kernel_source_dir="${kernel_dir}/source"
 mkdir -p "${kernel_source_dir}"
-readonly kernel_config="${dir}/config/linux-${kernel_version}.config"
 readonly kernel_bzimage="${kernel_source_dir}/arch/x86/boot/bzImage"
 readonly kernel_reboot_patch_url="https://raw.githubusercontent.com/coreos/rkt/v1.22.0/stage1/usr_from_kvm/kernel/patches/0001-reboot.patch"
 readonly kernel_header_dir="/lib/modules/${kernel_version}${kernel_version_suffix}/source"
 readonly busybox_mkdir_url="https://busybox.net/downloads/binaries/1.26.2-i686/busybox_MKDIR"
 
-test -f "${kernel_config}" ||
-{
-  echo "couldn't find config for kernel ${kernel_version} in ${dir}/config - aborting" >&2
-  exit 1
-}
+kernel_config="${dir}/config/linux-${kernel_version}.config"
+if [[ ! -f "${kernel_config}" ]]; then
+  kernel_config="${dir}/config/linux-${kernel_version_minor}.config"
+  if [[ ! -f "${kernel_config}" ]]; then
+    echo "couldn't find config for kernel ${kernel_version} or ${kernel_version_minor} in ${dir}/config - aborting" >&2
+    exit 1
+  fi
+fi
 
 # download kernel
 test -f "${kernel_dir}/kernel.tar.xz" || curl -LsS "${kernel_url}" -o "${kernel_dir}/kernel.tar.xz"
@@ -90,5 +93,8 @@ EOF
 sed -e "s/{{kernel_version}}/${kernel_version}/" "${dir}/manifest.tmpl.json" >"${aci_dir}/manifest"
 
 # build aci
-tar -czf "${target_aci}" -C "${aci_dir}" .
+tar -czf "${target_aci}" \
+  --exclude ".install" \
+  --exclude "..install.cmd" \
+  -C "${aci_dir}" .
 echo "Successfully build ${target_aci}"
