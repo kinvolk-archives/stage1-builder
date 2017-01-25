@@ -93,5 +93,8 @@ EOF
 sed -e "s/{{kernel_version}}/${kernel_version}/" "${dir}/manifest.tmpl.json" >"${aci_dir}/manifest"
 
 # build aci
-tar -czf "${target_aci}" -C "${aci_dir}" .
+tar -czf "${target_aci}" \
+  --exclude ".install" \
+  --exclude "..install.cmd" \
+  -C "${aci_dir}" .
 echo "Successfully build ${target_aci}"
