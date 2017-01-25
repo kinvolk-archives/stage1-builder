@@ -10,7 +10,7 @@ if [[ $# -gt 3 ]]; then
   exit 1
 fi
 
-readonly kernel_latest_stable="4.9.4"
+readonly kernel_latest_stable="4.9.5"
 
 readonly dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly kernel_version="${1:-${kernel_latest_stable}}"

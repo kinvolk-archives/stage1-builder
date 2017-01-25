@@ -8,7 +8,7 @@ Experimental build script for custom rkt stage1-kvm images.
 ./builder
 ```
 
-The only supported kernel right now is 4.9.4 (the latest stable at the
+The only supported kernel right now is 4.9.z (the latest stable at the
 time of writing) and picked by default.
 
 A successful build produces a `stage1-kvm-linux-4.9.4.aci` file to be
