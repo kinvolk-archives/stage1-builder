@@ -5,8 +5,8 @@ set -eu
 set -o pipefail
 
 if [[ $# -gt 3 ]]; then
-  echo "Usage: $0 <kernel version> [<target dir> [<build dir>]]" >&2
-  echo "Example: $0 4.9.4 aci/ /tmp/aci-build"
+  echo "Usage: $0 [<kernel version> [<target dir> [<build dir>]]]" >&2
+  echo "Example: $0 4.9.4 aci/ /tmp/aci-build" >&2
   exit 1
 fi
 
