@@ -12,10 +12,14 @@ dependencies:
       sudo apt-get install -y build-essential make rsync curl patch tar gzip
     - |
       S1B_KERNEL_VERSION=4.9.6 ./builder
+    - |
+      S1B_KERNEL_VERSION=4.4.45 ./builder
 
 test:
   override:
     - |
       true
   post:
-    - mv *.aci $CIRCLE_ARTIFACTS/
+    - mv -v *.aci $CIRCLE_ARTIFACTS/
+    - sha512sum $CIRCLE_ARTIFACTS/*
+    - wc -c $CIRCLE_ARTIFACTS/*
