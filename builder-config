@@ -7,6 +7,9 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # The kernel version to build and include
 S1B_KERNEL_VERSION="${S1B_KERNEL_VERSION:-"4.9.6"}"
 
+# The upstream stage1 kvm to set as dependency
+S1B_UPSTREAM_STAGE1_KVM_VERSION="${S1B_UPSTREAM_STAGE1_KVM_VERSION:-"1.23.0"}"
+
 # The kernel version suffix, e.g. ("-custom-v1")
 S1B_KERNEL_VERSION_SUFFIX="${S1B_KERNEL_VERSION_SUFFIX:-"-kinvolk-v1"}"
 

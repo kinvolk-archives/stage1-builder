@@ -23,7 +23,7 @@ readonly kernel_version_minor="${kernel_version%.*}"
 readonly aci_dir="${S1B_ACI_DIR}"
 mkdir -p "${aci_dir}"
 
-readonly target_aci="stage1-kvm-linux-${kernel_version}.aci"
+readonly target_aci="stage1-kvm-${S1B_UPSTREAM_STAGE1_KVM_VERSION}-linux-${kernel_version}.aci"
 
 readonly rootfs_dir="${aci_dir}/rootfs"
 mkdir -p "${rootfs_dir}"
@@ -101,11 +101,15 @@ ExecStartPost=/usr/bin/mount --bind "${kernel_header_dir}" %I/${kernel_header_di
 EOF
 
 # include manifest
-sed -e "s/{{kernel_version}}/${kernel_version}/" "${dir}/manifest.tmpl.json" >"${aci_dir}/manifest"
+sed \
+  -e "s/{{kernel_version}}/${kernel_version}/g" \
+  -e "s/{{upstream_stage1_kvm_version}}/${S1B_UPSTREAM_STAGE1_KVM_VERSION}/g" \
+  "${dir}/manifest.tmpl.json" >"${aci_dir}/manifest"
 
 # build aci
 tar -czf "${target_aci}" \
   --exclude ".install" \
   --exclude "..install.cmd" \
   -C "${aci_dir}" .
+
 echo "Successfully build ${target_aci}"
