@@ -83,6 +83,8 @@ mkdir -p "${rootfs_dir}/${kernel_header_dir}"
   rsync -a "${kernel_source_dir}/include/" "${rootfs_dir}/${kernel_header_dir}/include/"
 )
 
+find "${rootfs_dir}/${kernel_header_dir}" \( -name '.install' -or -name '..install.cmd' \) -delete
+
 # add busybox mkdir to stage1
 mkdir -p "${rootfs_dir}/usr/bin"
 test -f "${rootfs_dir}/usr/bin/mkdir" ||
@@ -107,9 +109,9 @@ sed \
   "${dir}/manifest.tmpl.json" >"${aci_dir}/manifest"
 
 # build aci
-tar -czf "${target_aci}" \
-  --exclude ".install" \
-  --exclude "..install.cmd" \
-  -C "${aci_dir}" .
+actool build --overwrite --no-compression "${aci_dir}" "${target_aci}"
+readonly hashsum=$(sha512sum "${target_aci}" | awk '{print $1}')
+gzip -cf "${target_aci}" >"${target_aci}.gz"
+mv "${target_aci}.gz" "${target_aci}"
 
-echo "Successfully build ${target_aci}"
+echo "Successfully build ${target_aci} with id sha512-${hashsum}"
