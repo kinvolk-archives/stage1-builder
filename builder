@@ -38,6 +38,7 @@ readonly kernel_source_dir="${kernel_dir}/source"
 mkdir -p "${kernel_source_dir}"
 readonly kernel_bzimage="${kernel_source_dir}/arch/x86/boot/bzImage"
 readonly kernel_reboot_patch_url="https://raw.githubusercontent.com/coreos/rkt/v1.22.0/stage1/usr_from_kvm/kernel/patches/0001-reboot.patch"
+readonly kernel_api_header_dir="/lib/modules/${kernel_version}${kernel_version_suffix}"
 readonly kernel_header_dir="/lib/modules/${kernel_version}${kernel_version_suffix}/source"
 
 readonly busybox_mkdir_url="https://busybox.net/downloads/binaries/1.26.2-i686/busybox_MKDIR"
@@ -76,11 +77,22 @@ test -f "${kernel_bzimage}" ||
 rsync -a "${kernel_bzimage}" "${rootfs_dir}/bzImage"
 
 # import kernel header
-mkdir -p "${rootfs_dir}/${kernel_header_dir}"
+mkdir -p "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include"
 (
   cd "${kernel_source_dir}"
-  ${mk} headers_install INSTALL_HDR_PATH="${rootfs_dir}/${kernel_header_dir}" >/dev/null
-  rsync -a "${kernel_source_dir}/include/" "${rootfs_dir}/${kernel_header_dir}/include/"
+
+  # install kernel api header
+  ${mk} headers_install INSTALL_HDR_PATH="${rootfs_dir}/${kernel_api_header_dir}" >/dev/null
+
+  # loosely following arch for the copied kernel headers
+  # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/linux#n158
+
+  for i in acpi asm-generic config crypto drm generated keys linux math-emu \
+    media net pcmcia scsi soc sound trace uapi video xen; do
+    rsync -a "include/${i}" "${rootfs_dir}/${kernel_header_dir}/include/"
+  done
+
+  rsync -a "arch/x86/include/"  "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include/"
 )
 
 find "${rootfs_dir}/${kernel_header_dir}" \( -name '.install' -or -name '..install.cmd' \) -delete
@@ -98,8 +110,8 @@ test -f "${rootfs_dir}/usr/bin/mkdir" ||
 mkdir -p "${rootfs_dir}/etc/systemd/system/prepare-app@.service.d"
 cat <<EOF >"${rootfs_dir}/etc/systemd/system/prepare-app@.service.d/10-bind-mount-kernel-header.conf"
 [Service]
-ExecStartPost=/usr/bin/mkdir -p %I/${kernel_header_dir}
-ExecStartPost=/usr/bin/mount --bind "${kernel_header_dir}" %I/${kernel_header_dir}
+ExecStartPost=/usr/bin/mkdir -p %I/${kernel_api_header_dir}
+ExecStartPost=/usr/bin/mount --bind "${kernel_api_header_dir}" %I/${kernel_api_header_dir}
 EOF
 
 # include manifest
