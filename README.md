@@ -46,7 +46,7 @@ rkt image fetch --insecure-options=image coreos.com/rkt/stage1-kvm:1.23.0
 Our builds can be fetched from `kinvolk.io/aci/rkt/stage1-kvm`, e.g.
 
 ```
-rkt fetch --insecure-options=image kinvolk.io/aci/rkt/stage1-kvm:1.23.0,kernelversion=4.9.6
+rkt image fetch --insecure-options=image kinvolk.io/aci/rkt/stage1-kvm:1.23.0,kernelversion=4.9.6
 ```
 
 ## Usage on Semaphore CI
