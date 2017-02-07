@@ -18,7 +18,11 @@ test -f "${user_config_file}" && source "${user_config_file}"
 
 readonly kernel_version="${S1B_KERNEL_VERSION}"
 readonly kernel_version_suffix="${S1B_KERNEL_VERSION_SUFFIX}"
-readonly kernel_version_minor="${kernel_version%.*}"
+if [[ "${kernel_version}" =~ ^.*-rc[0-9]+$ ]]; then
+  readonly kernel_version_minor="${kernel_version%-rc*}"
+else
+  readonly kernel_version_minor="${kernel_version%.*}"
+fi
 
 readonly aci_dir="${S1B_ACI_DIR}"
 mkdir -p "${aci_dir}"
@@ -31,7 +35,11 @@ mkdir -p "${rootfs_dir}"
 readonly build_dir="${S1B_BUILD_DIR}"
 mkdir -p "${build_dir}"
 
-readonly kernel_url="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${kernel_version}.tar.xz"
+if [[ "${kernel_version}" =~ ^.*-rc[0-9]+$ ]]; then
+  readonly kernel_url="https://cdn.kernel.org/pub/linux/kernel/v4.x/testing/linux-${kernel_version}.tar.xz"
+else
+  readonly kernel_url="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${kernel_version}.tar.xz"
+fi
 readonly kernel_dir="${build_dir}/kernel"
 mkdir -p "${kernel_dir}"
 readonly kernel_source_dir="${kernel_dir}/source"
