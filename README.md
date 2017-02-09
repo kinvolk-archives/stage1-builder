@@ -49,34 +49,45 @@ Our builds can be fetched from `kinvolk.io/aci/rkt/stage1-kvm`, e.g.
 rkt image fetch --insecure-options=image kinvolk.io/aci/rkt/stage1-kvm:1.23.0,kernelversion=4.9.6
 ```
 
-## Usage on Semaphore CI
+To verify stage1-kvm indeed boots the custom kernel, you can run `uname -r`, e.g.
 
-As Semaphore CI doesn't include rkt by default on their platform, rkt must be
-downloaded as a first step.
-
-Example `semaphore.sh`:
-
-```bash
-#!/bin/bash
-
-readonly rkt_version="1.23.0"
-
-if [[ ! -f "./rkt/rkt" ]] || \
-  [[ ! "$(./rkt/rkt version | awk '/rkt Version/{print $3}')" == "${rkt_version}" ]]; then
-
-  curl -LsS "https://github.com/coreos/rkt/releases/download/v${rkt_version}/rkt-v${rkt_version}.tar.gz" \
-    -o rkt.tgz
-
-  mkdir -p rkt
-  tar -xf rkt.tgz -C rkt --strip-components=1
-fi
-
-# Pre-fetch stage1 dependency due to rkt#2241
-# https://github.com/coreos/rkt/issues/2241
-sudo ./rkt/rkt image fetch --insecure-options=image coreos.com/rkt/stage1-kvm:${rkt_version}
-
-sudo ./rkt/rkt run \
-  --stage1-name="kinvolk.io/aci/rkt/stage1-kvm:${rkt_version},kernelversion=4.9.6" \
-  --environment=C_INCLUDE_PATH="/lib/modules/4.9.6-kinvolk-v1/include" \
-  ...
 ```
+rkt run \
+  --insecure-options=image \
+  --stage1-name=kinvolk.io/aci/rkt/stage1-kvm:1.23.0,kernelversion=4.9.6 \
+  quay.io/coreos/alpine-sh \
+  --exec=/bin/sh -- -c 'uname -r'
+```
+
+## Using custom built stage1-kvm images on Semaphore CI
+
+See `examples/semaphore.sh` for an example script which shows the necessary
+steps to use a custom stage1-kvm image and serves as a starting point.
+
+### Configuration
+
+Go to `Project Settings` -> `Build Settings` -> `+ Add New Command Line"` and
+add `./semaphore.sh` to run the tests. Depending on your project / requirements,
+additional settings might be necessary (e.g. install dependencies before).
+
+Go to `Project Settings` -> `Platform Settings` and make sure a platform
+with Docker support is selected (at the time of writing this is
+`Ubuntu 14.04 LTS v1701 (with Docker support)`).
+
+### Example
+
+For a real world example, see [semaphore.sh from weaveworks/tcptracer-bpf](https://github.com/weaveworks/tcptracer-bpf/blob/master/semaphore.sh).
+
+## FAQ
+
+### Warning: unable to translate guest address
+
+```
+...
+  Warning: unable to translate guest address 0x410000007c58 to host
+  Warning: unable to translate guest address 0x410000007c58 to host
+
+  # KVM session ended normally.
+```
+
+This output is coming from LKVM and can be ignored.
