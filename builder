@@ -27,7 +27,10 @@ fi
 readonly aci_dir="${S1B_ACI_DIR}"
 mkdir -p "${aci_dir}"
 
-readonly target_aci="stage1-kvm-${S1B_UPSTREAM_STAGE1_KVM_VERSION}-linux-${kernel_version}.aci"
+readonly out_dir="${S1B_OUT_DIR}"
+mkdir -p "${out_dir}"
+
+readonly target_aci="${out_dir}/stage1-kvm-${S1B_UPSTREAM_STAGE1_KVM_VERSION}-linux-${kernel_version}.aci"
 
 readonly rootfs_dir="${aci_dir}/rootfs"
 mkdir -p "${rootfs_dir}"
@@ -61,6 +64,12 @@ if [[ ! -f "${kernel_config}" ]]; then
     exit 1
   fi
 fi
+
+# stage1 aci already build?
+test -f "${target_aci}" && {
+  echo "${target_aci} exists already, nothing to do" >&2
+  exit 0
+}
 
 # download kernel
 test -f "${kernel_dir}/kernel.tar.xz" || curl -LsS "${kernel_url}" -o "${kernel_dir}/kernel.tar.xz"
