@@ -5,6 +5,7 @@ machine:
 dependencies:
   cache_directories:
     - aci
+    - aci-files
     - build
   override:
     - |
@@ -22,6 +23,6 @@ test:
     - |
       true
   post:
-    - mv -v *.aci $CIRCLE_ARTIFACTS/
+    - mv -v aci-files/*.aci $CIRCLE_ARTIFACTS/
     - sha512sum $CIRCLE_ARTIFACTS/*
     - wc -c $CIRCLE_ARTIFACTS/*

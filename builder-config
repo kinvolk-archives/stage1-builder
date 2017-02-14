@@ -4,6 +4,9 @@
 # Working directory
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# The directory to store the built aci files
+S1B_OUT_DIR="${S1B_OUT_DIR:-${DIR}/aci-files}"
+
 # The kernel version to build and include
 S1B_KERNEL_VERSION="${S1B_KERNEL_VERSION:-"4.9.6"}"
 
