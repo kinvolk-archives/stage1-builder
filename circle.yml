@@ -14,7 +14,7 @@ dependencies:
     - |
       go get github.com/appc/spec/actool
     - |
-      S1B_KERNEL_VERSION=4.9.6 ./builder
+      S1B_KERNEL_VERSION=${S1B_KERNEL_VERSION:-4.9.6} ./builder
     - |
       S1B_KERNEL_VERSION=4.4.45 ./builder
 
