@@ -49,6 +49,14 @@ Our builds can be fetched from `kinvolk.io/aci/rkt/stage1-kvm`, e.g.
 rkt image fetch --insecure-options=image kinvolk.io/aci/rkt/stage1-kvm:1.23.0,kernelversion=4.9.6
 ```
 
+A list of currently available images can be fetched from the Circle CI API, e.g.
+
+```
+curl -sSL 'https://circleci.com/api/v1.1/project/github/kinvolk/stage1-builder/latest/artifacts?branch=master&filter=successful' \
+  | jq -r .[].path \
+  | sed -e 's/.*\/\([^/]*\)\.aci$/\1/'
+```
+
 To verify stage1-kvm indeed boots the custom kernel, you can run `uname -r`, e.g.
 
 ```
