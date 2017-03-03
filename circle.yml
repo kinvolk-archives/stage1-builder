@@ -14,11 +14,18 @@ dependencies:
     - |
       go get github.com/appc/spec/actool
     - |
-      S1B_KERNEL_VERSION=${S1B_KERNEL_VERSION:-4.9.9} ./builder
-    - |
-      S1B_KERNEL_VERSION=4.8.13 ./builder
-    - |
-      S1B_KERNEL_VERSION=4.4.45 ./builder
+      if [ -n "$S1B_KERNEL_VERSION" ] ; then
+          # Parametrized build, triggered manually
+          for S1B_KERNEL_VERSION in $S1B_KERNEL_VERSION ; do
+               S1B_KERNEL_VERSION="$S1B_KERNEL_VERSION" ./builder
+          done
+      else
+          LATEST_STABLE="$(curl -LsS https://www.kernel.org/releases.json | jq -r '.latest_stable.version')"
+          # Build a few known versions + the latest stable
+          for S1B_KERNEL_VERSION in 4.4.45 4.8.13 4.9.9 "$LATEST_STABLE" ; do
+               S1B_KERNEL_VERSION="$S1B_KERNEL_VERSION" ./builder
+          done
+      fi
 
 test:
   override:
