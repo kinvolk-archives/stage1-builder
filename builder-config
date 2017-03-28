@@ -24,3 +24,7 @@ S1B_BUILD_DIR="${S1B_BUILD_DIR:-${DIR}/build/${S1B_KERNEL_VERSION}}"
 
 # The directory to store the aci contents (manifest, rootfs) in
 S1B_ACI_DIR="${S1B_ACI_DIR:-${DIR}/aci/${S1B_KERNEL_VERSION}}"
+
+# Optional extra kernel patches to apply
+S1B_EXTRA_KERNEL_PATCH_FILES="${S1B_EXTRA_KERNEL_PATCH_FILES:-}"
+S1B_EXTRA_KERNEL_PATCH_URLS="${S1B_EXTRA_KERNEL_PATCH_URLS:-}"

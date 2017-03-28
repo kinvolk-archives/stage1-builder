@@ -86,7 +86,14 @@ test -f "${kernel_bzimage}" ||
   cd "${kernel_source_dir}"
   curl -LsS "${kernel_reboot_patch_url}" -O
   # TODO(schu) fails when patch was applied already
-  patch --silent -p1 < *.patch
+  patch --silent -p1 < $(basename "${kernel_reboot_patch_url}")
+  for patch_url in ${S1B_EXTRA_KERNEL_PATCH_URLS} ; do
+    curl -LsS "${patch_url}" -O
+    patch --silent -p1 < $(basename "${patch_url}")
+  done
+  for patch_file in ${S1B_EXTRA_KERNEL_PATCH_FILES} ; do
+    patch --silent -p1 < "${patch_file}"
+  done
   ${mk} bzImage
 )
 
