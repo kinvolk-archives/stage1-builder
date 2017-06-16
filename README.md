@@ -88,6 +88,17 @@ For a real world example, see [semaphore.sh from weaveworks/tcptracer-bpf](https
 
 ## FAQ
 
+### run: cannot find aci satisfying name ...
+
+If you encounter an error like
+
+```
+run: cannot find aci satisfying name: "coreos.com/rkt/stage1-kvm" and labels: [{"os" "linux"} {"arch" "amd64"} {"version" "1.26.0"}] in the local store
+```
+
+make sure you have pre-fetched the stage1 dependency as described above.
+
+
 ### Warning: unable to translate guest address
 
 ```
