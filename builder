@@ -81,12 +81,11 @@ test "$(find "${kernel_source_dir}" -maxdepth 0 -type d -empty 2>/dev/null)" && 
 test -f "${kernel_source_dir}/.config" || sed -e "s/-rkt-v1/${kernel_version_suffix}/g" "${kernel_config}" >"${kernel_source_dir}/.config"
 
 function patch_kernel() {
-  filename=$1
-  [ ! -f ${filename} ] && return
+  local filename=$1
+  [[ ! -f ${filename} ]] && return
 
-  patch --silent -p1 -f --dry-run < ${filename} 2>/dev/null
-  if [ $? -eq 0 ]; then
-    patch --silent -p1 -f < ${filename}
+  if patch --silent -p1 -f --dry-run < "${filename}" 2>/dev/null; then
+    patch --silent -p1 -f < "${filename}"
   fi
 }
 
@@ -99,13 +98,13 @@ test -f "${kernel_bzimage}" ||
   set +e
 
   # Before applying patch, check if the patch was already applied
-  patch_kernel $(basename "${kernel_reboot_patch_url}")
+  patch_kernel "$(basename "${kernel_reboot_patch_url}")"
   for patch_url in ${S1B_EXTRA_KERNEL_PATCH_URLS} ; do
     curl -LsS "${patch_url}" -O
-    patch_kernel $(basename "${patch_url}")
+    patch_kernel "$(basename "${patch_url}")"
   done
   for patch_file in ${S1B_EXTRA_KERNEL_PATCH_FILES} ; do
-    patch_kernel ${patch_file}
+    patch_kernel "${patch_file}"
   done
 
   set -e
