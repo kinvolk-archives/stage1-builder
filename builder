@@ -56,12 +56,14 @@ readonly busybox_mkdir_url="https://busybox.net/downloads/binaries/1.26.2-i686/b
 
 readonly mk="$(which make) -j${S1B_JOBS}"
 
-kernel_config="${dir}/config/linux-${kernel_version}.config"
-if [[ ! -f "${kernel_config}" ]]; then
-  kernel_config="${dir}/config/linux-${kernel_version_minor}.config"
+if [[ -z ${S1B_KERNEL_PICK_BZIMAGE} ]]; then
+  kernel_config="${dir}/config/linux-${kernel_version}.config"
   if [[ ! -f "${kernel_config}" ]]; then
-    echo "couldn't find config for kernel ${kernel_version} or ${kernel_version_minor} in ${dir}/config - aborting" >&2
-    exit 1
+    kernel_config="${dir}/config/linux-${kernel_version_minor}.config"
+    if [[ ! -f "${kernel_config}" ]]; then
+      echo "couldn't find config for kernel ${kernel_version} or ${kernel_version_minor} in ${dir}/config - aborting" >&2
+      exit 1
+    fi
   fi
 fi
 
@@ -71,55 +73,62 @@ test -f "${target_aci}" && {
   exit 0
 }
 
-# download kernel
-test -f "${kernel_dir}/kernel.tar.xz" || curl -LsS "${kernel_url}" -o "${kernel_dir}/kernel.tar.xz"
+if [[ -z ${S1B_KERNEL_PICK_BZIMAGE} ]]; then
 
-# unpack kernel
-test "$(find "${kernel_source_dir}" -maxdepth 0 -type d -empty 2>/dev/null)" && tar -C "${kernel_source_dir}" --strip-components=1 -xf "${kernel_dir}/kernel.tar.xz"
+  # download kernel
+  test -f "${kernel_dir}/kernel.tar.xz" || curl -LsS "${kernel_url}" -o "${kernel_dir}/kernel.tar.xz"
 
-# configure kernel
-test -f "${kernel_source_dir}/.config" || sed -e "s/-rkt-v1/${kernel_version_suffix}/g" "${kernel_config}" >"${kernel_source_dir}/.config"
+  # unpack kernel
+  test "$(find "${kernel_source_dir}" -maxdepth 0 -type d -empty 2>/dev/null)" && tar -C "${kernel_source_dir}" --strip-components=1 -xf "${kernel_dir}/kernel.tar.xz"
 
-# build kernel
-test -f "${kernel_bzimage}" ||
-(
-  cd "${kernel_source_dir}"
-  curl -LsS "${kernel_reboot_patch_url}" -O
-  # TODO(schu) fails when patch was applied already
-  patch --silent -p1 < $(basename "${kernel_reboot_patch_url}")
-  for patch_url in ${S1B_EXTRA_KERNEL_PATCH_URLS} ; do
-    curl -LsS "${patch_url}" -O
-    patch --silent -p1 < $(basename "${patch_url}")
-  done
-  for patch_file in ${S1B_EXTRA_KERNEL_PATCH_FILES} ; do
-    patch --silent -p1 < "${patch_file}"
-  done
-  ${mk} bzImage
-)
+  # configure kernel
+  test -f "${kernel_source_dir}/.config" || sed -e "s/-rkt-v1/${kernel_version_suffix}/g" "${kernel_config}" >"${kernel_source_dir}/.config"
 
-# import kernel
-rsync -a "${kernel_bzimage}" "${rootfs_dir}/bzImage"
+  # build kernel
+  test -f "${kernel_bzimage}" ||
+  (
+    cd "${kernel_source_dir}"
+    curl -LsS "${kernel_reboot_patch_url}" -O
+    # TODO(schu) fails when patch was applied already
+    patch --silent -p1 < $(basename "${kernel_reboot_patch_url}")
+    for patch_url in ${S1B_EXTRA_KERNEL_PATCH_URLS} ; do
+      curl -LsS "${patch_url}" -O
+      patch --silent -p1 < $(basename "${patch_url}")
+    done
+    for patch_file in ${S1B_EXTRA_KERNEL_PATCH_FILES} ; do
+      patch --silent -p1 < "${patch_file}"
+    done
+    ${mk} bzImage
+  )
 
-# import kernel header
-mkdir -p "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include"
-(
-  cd "${kernel_source_dir}"
+  # import kernel
+  rsync -a "${kernel_bzimage}" "${rootfs_dir}/bzImage"
 
-  # install kernel api header
-  ${mk} headers_install INSTALL_HDR_PATH="${rootfs_dir}/${kernel_api_header_dir}" >/dev/null
+  # import kernel header
+  mkdir -p "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include"
+  (
+    cd "${kernel_source_dir}"
 
-  # loosely following arch for the copied kernel headers
-  # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/linux#n158
+    # install kernel api header
+    ${mk} headers_install INSTALL_HDR_PATH="${rootfs_dir}/${kernel_api_header_dir}" >/dev/null
 
-  for i in acpi asm-generic config crypto drm generated keys linux math-emu \
-    media net pcmcia scsi soc sound trace uapi video xen; do
-    rsync -a "include/${i}" "${rootfs_dir}/${kernel_header_dir}/include/"
-  done
+    # loosely following arch for the copied kernel headers
+    # https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/linux#n158
 
-  rsync -a "arch/x86/include/"  "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include/"
-)
+    for i in acpi asm-generic config crypto drm generated keys linux math-emu \
+      media net pcmcia scsi soc sound trace uapi video xen; do
+      rsync -a "include/${i}" "${rootfs_dir}/${kernel_header_dir}/include/"
+    done
 
-find "${rootfs_dir}/${kernel_header_dir}" \( -name '.install' -or -name '..install.cmd' \) -delete
+    rsync -a "arch/x86/include/"  "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include/"
+  )
+
+  find "${rootfs_dir}/${kernel_header_dir}" \( -name '.install' -or -name '..install.cmd' \) -delete
+
+else
+  # import pre-built kernel
+  rsync -a "${S1B_KERNEL_PICK_BZIMAGE}" "${rootfs_dir}/bzImage"
+fi
 
 # add busybox mkdir to stage1
 mkdir -p "${rootfs_dir}/usr/bin"

@@ -34,6 +34,11 @@ found under
 * `/lib/modules/$(uname -r)/include` for the kernel API headers
 * `/lib/modules/$(uname -r)/source/include` for the kernel headers
 
+A pre-built bzImage can also be used:
+```
+S1B_KERNEL_VERSION=4.15.0 S1B_KERNEL_PICK_BZIMAGE=$HOME/git/linux/bzImage-4.15-rkt ./builder
+```
+
 Note: at the time of writing, you have to pre-fetch all stage1 dependencies
 manually due to https://github.com/coreos/rkt/issues/2241
 This is can be done as follows (the version must match

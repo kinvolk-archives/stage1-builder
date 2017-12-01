@@ -7,6 +7,9 @@ readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # The directory to store the built aci files
 S1B_OUT_DIR="${S1B_OUT_DIR:-${DIR}/aci-files}"
 
+# Skip compilation and pick this pre-built image
+S1B_KERNEL_PICK_BZIMAGE="${S1B_KERNEL_PICK_BZIMAGE:-}"
+
 # The kernel version to build and include
 S1B_KERNEL_VERSION="${S1B_KERNEL_VERSION:-"4.11.5"}"
 
