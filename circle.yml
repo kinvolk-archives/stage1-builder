@@ -10,7 +10,7 @@ dependencies:
   override:
     - |
       sudo apt-get update &&
-      sudo apt-get install -y build-essential make rsync curl patch tar gzip
+      sudo apt-get install -y build-essential make rsync curl patch tar gzip libelf-dev
     - |
       go get github.com/appc/spec/actool
     - |
@@ -22,7 +22,7 @@ dependencies:
       else
           LATEST_STABLE="$(curl -LsS https://www.kernel.org/releases.json | jq -r '.latest_stable.version')"
           # Build a few known versions + the latest stable
-          for S1B_KERNEL_VERSION in 4.1.38 4.4.45 4.8.13 4.9.9 "$LATEST_STABLE" ; do
+          for S1B_KERNEL_VERSION in "$LATEST_STABLE" 4.1.49 4.4.114 4.9.79 4.14.16 ; do
                S1B_KERNEL_VERSION="$S1B_KERNEL_VERSION" ./builder
           done
       fi

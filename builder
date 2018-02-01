@@ -48,7 +48,7 @@ mkdir -p "${kernel_dir}"
 readonly kernel_source_dir="${kernel_dir}/source"
 mkdir -p "${kernel_source_dir}"
 readonly kernel_bzimage="${kernel_source_dir}/arch/x86/boot/bzImage"
-readonly kernel_reboot_patch_url="https://raw.githubusercontent.com/coreos/rkt/v1.26.0/stage1/usr_from_kvm/kernel/patches/0001-reboot.patch"
+readonly kernel_reboot_patch_url="https://raw.githubusercontent.com/coreos/rkt/v1.29.0/stage1/usr_from_kvm/kernel/patches/0001-reboot.patch"
 readonly kernel_api_header_dir="/lib/modules/${kernel_version}${kernel_version_suffix}"
 readonly kernel_header_dir="/lib/modules/${kernel_version}${kernel_version_suffix}/source"
 
@@ -98,7 +98,7 @@ test -f "${kernel_bzimage}" ||
 )
 
 # import kernel
-rsync -a "${kernel_bzimage}" "${rootfs_dir}/bzImage"
+rsync -a "${kernel_bzimage}" "${rootfs_dir}/kernel_image"
 
 # import kernel header
 mkdir -p "${rootfs_dir}/${kernel_header_dir}/include/arch/x86/include"
