@@ -4,11 +4,11 @@ set -eu
 set -o pipefail
 
 # The kernel versions we want to run the tests on
-readonly kernel_versions=("4.9.6")
+readonly kernel_versions=("4.9.96")
 
 # The rkt version which is set as a dependency for
 # the custom stage1-kvm images
-readonly rkt_version="1.23.0"
+readonly rkt_version="1.30.0"
 
 # Directory where this file is, used in the example below
 readonly dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
