@@ -15,8 +15,8 @@ readonly dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Download rkt if not available yet as Semaphore CI
 # doesn't have rkt at the time of writing
-if [[ ! -f "./rkt/rkt" ]] \
-  || [[ ! "$(./rkt/rkt version | awk '/rkt Version/{print $3}')" == "${rkt_version}" ]]; then
+if [[ ! -f "./rkt/rkt" ]] ||
+  [[ ! "$(./rkt/rkt version | awk '/rkt Version/{print $3}')" == "${rkt_version}" ]]; then
 
   curl -LsS "https://github.com/coreos/rkt/releases/download/v${rkt_version}/rkt-v${rkt_version}.tar.gz" \
     -o rkt.tgz
