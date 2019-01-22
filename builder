@@ -80,20 +80,35 @@ test "$(find "${kernel_source_dir}" -maxdepth 0 -type d -empty 2>/dev/null)" && 
 # configure kernel
 test -f "${kernel_source_dir}/.config" || sed -e "s/-rkt-v1/${kernel_version_suffix}/g" "${kernel_config}" >"${kernel_source_dir}/.config"
 
+function patch_kernel() {
+  local filename=$1
+  [[ ! -f ${filename} ]] && return
+
+  if patch --silent -p1 -f --dry-run < "${filename}" 2>/dev/null; then
+    patch --silent -p1 -f < "${filename}"
+  fi
+}
+
 # build kernel
 test -f "${kernel_bzimage}" ||
 (
   cd "${kernel_source_dir}"
   curl -LsS "${kernel_reboot_patch_url}" -O
-  # TODO(schu) fails when patch was applied already
-  patch --silent -p1 < $(basename "${kernel_reboot_patch_url}")
+
+  set +e
+
+  # Before applying patch, check if the patch was already applied
+  patch_kernel "$(basename "${kernel_reboot_patch_url}")"
   for patch_url in ${S1B_EXTRA_KERNEL_PATCH_URLS} ; do
     curl -LsS "${patch_url}" -O
-    patch --silent -p1 < $(basename "${patch_url}")
+    patch_kernel "$(basename "${patch_url}")"
   done
   for patch_file in ${S1B_EXTRA_KERNEL_PATCH_FILES} ; do
-    patch --silent -p1 < "${patch_file}"
+    patch_kernel "${patch_file}"
   done
+
+  set -e
+
   ${mk} bzImage
 )
 
